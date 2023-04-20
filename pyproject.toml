@@ -21,3 +21,15 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = ["pytest", "black", "mypy", "ruff"]
+
+[tool.hatch.build]
+include = [
+  "trpc/**/*.py",
+  "trpc/py.typed",
+  "LICENSE",
+  "README.md",
+  "pyproject.toml",
+]
+exclude = [
+  "tests",
+]
