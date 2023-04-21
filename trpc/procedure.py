@@ -21,7 +21,7 @@ def query(
 ) -> "WrappedProcedure":
     def wrap_procedure(f: Callable):
         return WrappedProcedure(
-            staticmethod(f),
+            f,
             name=name,
             private=private,
             type_=ProcedureType.QUERY,
@@ -35,7 +35,7 @@ def mutation(
 ) -> "WrappedProcedure":
     def wrap_procedure(f: Callable):
         return WrappedProcedure(
-            staticmethod(f),
+            f,
             name=name,
             private=private,
             type_=ProcedureType.MUTATION,
