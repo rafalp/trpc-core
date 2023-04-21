@@ -16,7 +16,9 @@ def query(impl: Callable) -> Callable:
     ...
 
 
-def query(name: Optional[str] = None, private: Optional[bool] = None) -> "WrappedProcedure":
+def query(
+    name: Optional[str] = None, private: Optional[bool] = None
+) -> "WrappedProcedure":
     def wrap_procedure(f: Callable):
         return WrappedProcedure(
             staticmethod(f),
@@ -28,7 +30,9 @@ def query(name: Optional[str] = None, private: Optional[bool] = None) -> "Wrappe
     return wrap_procedure
 
 
-def mutation(name: Optional[str] = None, private: Optional[bool] = None) -> "WrappedProcedure":
+def mutation(
+    name: Optional[str] = None, private: Optional[bool] = None
+) -> "WrappedProcedure":
     def wrap_procedure(f: Callable):
         return WrappedProcedure(
             staticmethod(f),
@@ -63,8 +67,8 @@ class WrappedProcedure:
         self.name = name
         self.private = private
         self.type_ = type_
-    
-    def query(self, context, **params):
+
+    def query(self, context, params):
         if self.type_ != ProcedureType.QUERY:
             if self.private:
                 raise TypeError(f"Procedure does not exist!")
@@ -72,7 +76,7 @@ class WrappedProcedure:
 
         return self.func(context, **params)
 
-    def mutation(self, context, **params):
+    def mutation(self, context, params):
         if self.type_ != ProcedureType.MUTATION:
             if self.private:
                 raise TypeError(f"Procedure does not exist!")

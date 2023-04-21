@@ -1,12 +1,12 @@
+from .backend import Backend
 from .procedure import Procedure, mutation, query
 from .router import Router
-from .server import Server
 
 
 __all__ = [
+    "Backend",
     "Procedure",
     "Router",
-    "Server",
     "mutation",
     "query",
 ]

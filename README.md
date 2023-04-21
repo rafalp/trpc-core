@@ -9,6 +9,8 @@ Toolkit for implementing tRPC servers in python
 ### Example tRPC API with Flask:
 
 ```python
+import json
+
 import trpc
 from flask import Flask, jsonify, request
 
@@ -19,24 +21,47 @@ class Router(trpc.Router):
         return "Hello world"
 
     @trpc.mutation(name="sum")
-    def sum(context, *, a: int, b: int) -> int:
+    def sum_items(context, *, a: int, b: int) -> int:
         return a + b
 
 
-server = trpc.Server(Router)
+backend = trpc.Backend(Router)
 
 
 app = Flask(__name__)
 
 
+def batch_request():
+    return request.args.get("batch") == "1"
+
+
+def create_response(result: trcp.Result):
+    return jsonify(result.data), result.status_code
+
+
 @app.route("/trpc/<path:path>", methods=["GET"])
 def trpc_query(path):
-    result = server.query(path)
-    return jsonify(result)
+    if request.args.get("input"):
+        input_data = json.loads(request.args["input"])
+    else:
+        input_data = None
+
+    result = backend.query(
+        path,
+        batch=batch_request(),
+        params=input_data,
+        context=request,
+    )
+    return create_response(result)
 
 
 @app.route("/trpc/<path:path>", methods=["POST"])
 def trpc_mutation(path):
-    result = server.mutation(path)
-    return jsonify(result)
+    result = backend.mutation(
+        path,
+        batch=batch_request(),
+        params=request.get_json(),
+        context=request,
+    )
+    return create_response(result)
 ```
