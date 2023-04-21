@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional, overload
+from typing import Callable, Optional, Union, overload
 
 
 class ProcedureType(str, Enum):
@@ -19,6 +19,13 @@ def query(impl: Callable) -> Callable:
 def query(
     name: Optional[str] = None, private: Optional[bool] = None
 ) -> "WrappedProcedure":
+    if callable(name) and private is None:
+        return WrappedProcedure(
+            name,
+            name=name.__name__,
+            type_=ProcedureType.QUERY,
+        )
+
     def wrap_procedure(f: Callable):
         return WrappedProcedure(
             f,
@@ -28,6 +35,11 @@ def query(
         )
 
     return wrap_procedure
+
+
+@overload
+def mutation(impl: Callable) -> Callable:
+    ...
 
 
 def mutation(
