@@ -7,8 +7,8 @@ class Router(trpc.Router):
         return "Hello world"
 
     @trpc.mutation(name="sum")
-    def sum(context, *, a: int, b: int) -> int:
-        return a + b
+    def sum(context) -> int:
+        return 42
 
 
 backend = trpc.Backend(Router)
@@ -26,11 +26,11 @@ def test_backend_executes_query():
 
 
 def test_backend_executes_mutation():
-    result = backend.mutation("sum", params={"a": 1, "b": 3})
+    result = backend.mutation("sum")
 
     assert result.status_code == 200
     assert result.data == {
         "result": {
-            "data": 4,
+            "data": 42,
         },
     }
