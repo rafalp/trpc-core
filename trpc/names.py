@@ -9,6 +9,9 @@ def convert_name_case(name: str) -> str:
     - 'test_name' -> 'testName'
     - 'lorem_ipsum_dolor' -> 'loremIpsumDolor'
     """
+    if "_" not in name:
+        return name
+
     fin_name = ""
 
     for i, c in enumerate(name):
