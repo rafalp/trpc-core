@@ -6,10 +6,13 @@ class Router(trpc.Router):
     def hello_world(context) -> str:
         return "Hello world"
 
-    @trpc.mutation(name="sum")
-    def sum(context) -> int:
-        return 42
+    @trpc.mutation(name="clearCache")
+    def clear_cache(context) -> bool:
+        return True
 
+    @trpc.mutation(name="add")
+    def add(context, a: int, b: int) -> int:
+        return a + b
 
 backend = trpc.Backend(Router)
 
@@ -25,12 +28,23 @@ def test_backend_executes_query():
     }
 
 
-def test_backend_executes_mutation():
-    result = backend.mutation("sum")
+def test_backend_executes_mutation_without_input():
+    result = backend.mutation("clearCache")
 
     assert result.status_code == 200
     assert result.data == {
         "result": {
-            "data": 42,
+            "data": True,
+        },
+    }
+
+
+def test_backend_executes_mutation_with_input():
+    result = backend.mutation("add", raw_input=(3, 4))
+
+    assert result.status_code == 200
+    assert result.data == {
+        "result": {
+            "data": 7,
         },
     }
