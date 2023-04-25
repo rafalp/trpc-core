@@ -14,6 +14,7 @@ class Router(trpc.Router):
     def add(context, a: int, b: int) -> int:
         return a + b
 
+
 backend = trpc.Backend(Router)
 
 
