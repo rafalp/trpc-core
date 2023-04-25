@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional, Union, overload
+from typing import Callable, Optional, overload
 
 
 class ProcedureType(str, Enum):
@@ -76,7 +76,7 @@ class WrappedProcedure:
     def query(self, context, input):
         if self.type_ != ProcedureType.QUERY:
             if self.private:
-                raise TypeError(f"Procedure does not exist!")
+                raise TypeError("Procedure does not exist!")
             raise TypeError(f"Procedure {self.name} is not a query!")
 
         return self.func(context, *input)
@@ -84,7 +84,7 @@ class WrappedProcedure:
     def mutation(self, context, input):
         if self.type_ != ProcedureType.MUTATION:
             if self.private:
-                raise TypeError(f"Procedure does not exist!")
+                raise TypeError("Procedure does not exist!")
             raise TypeError(f"Procedure {self.name} is not a mutation!")
 
         return self.func(context, *input)
