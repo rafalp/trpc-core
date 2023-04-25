@@ -32,3 +32,5 @@ jobs:
     - name: Linters
       run: |
         black --check .
+        ruff trpc tests
+        mypy trpc

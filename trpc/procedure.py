@@ -19,13 +19,6 @@ def query(impl: Callable) -> Callable:
 def query(
     name: Optional[str] = None, private: Optional[bool] = None
 ) -> "WrappedProcedure":
-    if callable(name) and private is None:
-        return WrappedProcedure(
-            name,
-            name=name.__name__,
-            type_=ProcedureType.QUERY,
-        )
-
     def wrap_procedure(f: Callable):
         return WrappedProcedure(
             f,
@@ -80,18 +73,18 @@ class WrappedProcedure:
         self.private = private
         self.type_ = type_
 
-    def query(self, context, params):
+    def query(self, context, input):
         if self.type_ != ProcedureType.QUERY:
             if self.private:
                 raise TypeError(f"Procedure does not exist!")
             raise TypeError(f"Procedure {self.name} is not a query!")
 
-        return self.func(context, **params)
+        return self.func(context, *input)
 
-    def mutation(self, context, params):
+    def mutation(self, context, input):
         if self.type_ != ProcedureType.MUTATION:
             if self.private:
                 raise TypeError(f"Procedure does not exist!")
             raise TypeError(f"Procedure {self.name} is not a mutation!")
 
-        return self.func(context, **params)
+        return self.func(context, *input)

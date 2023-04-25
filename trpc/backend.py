@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Sequence, Type, Union
 
 from .procedure import Procedure, ProcedureType, WrappedProcedure
 from .router import Router
@@ -80,17 +80,17 @@ class Backend:
         self,
         type_: ProcedureType,
         path: str,
-        params: Optional[dict] = None,
+        input: Optional[Dict[str, Any]] = None,
         context: Optional[Any] = None,
     ) -> "Result":
         results = []
         status_codes = set()
 
         names = path.split(",")
-        for i, call_name in enumerate(names, 1):
+        for i, call_name in enumerate(names):
             call_id = str(i)
-            call_params = params.get(call_id) if params else None
-            result = self.execute_single(type_, call_name, call_params, context)
+            call_input = input.get(call_id) if input else None
+            result = self.execute_single(type_, call_name, call_input, context)
 
             results.append(result.data)
             status_codes.add(result.status_code)
@@ -104,7 +104,7 @@ class Backend:
         self,
         type_: ProcedureType,
         name: str,
-        params: Optional[dict] = None,
+        input: Optional[Sequence[Any]] = None,
         context: Optional[Any] = None,
     ) -> "Result":
         procedure = self.procedures.get(name)
@@ -112,9 +112,9 @@ class Backend:
             raise Error(f'No "{str(type_).lower()}"-procedure on path "{name}"')
 
         if type_ == ProcedureType.QUERY:
-            result = procedure.query(context, params or {})
+            result = procedure.query(context, input)
         elif type_ == ProcedureType.MUTATION:
-            result = procedure.mutation(context, params or {})
+            result = procedure.mutation(context, input)
 
         return Result(
             data={
