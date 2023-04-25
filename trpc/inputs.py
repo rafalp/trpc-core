@@ -1,10 +1,14 @@
 from inspect import signature
 from typing import Any, Callable, Optional, Tuple
 
+from .names import convert_name_case
+
 any_type = lambda x: x
 
+ArgTransform = Tuple[str, Callable]
 
-def create_default_input(func: Callable) -> Optional[Tuple[Callable, ...]]:
+
+def create_default_input(func: Callable) -> Optional[Tuple[ArgTransform, ...]]:
     params = signature(func).parameters
 
     converters = []
@@ -13,7 +17,9 @@ def create_default_input(func: Callable) -> Optional[Tuple[Callable, ...]]:
             continue
 
         param_type = params[param_name]
-        converters.append(param_type.annotation or any_type)
+        converters.append(
+            (convert_name_case(param_name), param_type.annotation or any_type)
+        )
 
     if not converters:
         return None
@@ -22,14 +28,26 @@ def create_default_input(func: Callable) -> Optional[Tuple[Callable, ...]]:
 
 
 def transform_raw_input(
-    transform: Tuple[Callable, ...], raw_input: Any
+    transform: Tuple[ArgTransform, ...], raw_input: Any
 ) -> Tuple[Any, ...]:
     normalized_input = normalize_raw_input(raw_input)
 
-    return tuple(
-        transform_func(normalized_input[i])
-        for i, transform_func in enumerate(transform[: len(normalized_input)])
-    )
+    errors = {}
+    inputs = []
+
+    for i, arg_transform in enumerate(transform):
+        arg_name, arg_type = arg_transform
+
+        try:
+            arg_value = arg_type(normalized_input[i])
+            inputs.append(arg_value)
+        except IndexError:
+            errors[arg_name] = "MISSING"
+
+    if errors:
+        raise ValueError(str(errors))
+
+    return tuple(inputs)
 
 
 def normalize_raw_input(raw_input: Any) -> Tuple[Any, ...]:
@@ -42,5 +60,5 @@ def normalize_raw_input(raw_input: Any) -> Tuple[Any, ...]:
         # to avoid the ambiguity (proc([...]) -> [[...]])
         return tuple(raw_input)
 
-    # Return tuple with only input
+    # Return tuple with single input value
     return (raw_input,)
